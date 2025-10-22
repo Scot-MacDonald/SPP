@@ -30,8 +30,8 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    directory: path.resolve(process.cwd(), "public/media"),
-    url: "/media",
-    mimeTypes: ["image/*", "image/svg+xml", "application/xml"],
+    directory: path.resolve(process.cwd(), "media"), // 🔹 Store in persistent directory
+    url: "/media", // 🔹 Public URL
+    mimeTypes: ["image/*", "image/svg+xml", "application/pdf"], // Restrict mime types
   } as any,
 };
