@@ -1,3 +1,4 @@
+// storage-adapter-import-placeholder
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { payloadCloudPlugin } from "@payloadcms/payload-cloud";
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
@@ -15,16 +16,16 @@ import {
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
 import { TextColorFeature } from "payload-lexical-typography";
-import sharp from "sharp";
+import sharp from "sharp"; // editor-import
 import path from "path";
-import { buildConfig, Field } from "payload"; // ✅ import Field for type casting
+import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
 
 import Categories from "./collections/Categories";
 import { Media } from "./collections/Media";
 import { Pages } from "./collections/Pages";
 import { Posts } from "./collections/Posts";
-import { Doctors } from "./collections/Doctors";
+import { Doctors } from "./collections/Doctors"; // <-- Added Doctors collection
 import Users from "./collections/Users";
 
 import { Footer } from "./globals/Footer/config";
@@ -38,6 +39,7 @@ import { beforeSyncWithSearch } from "@/search/beforeSync";
 import localization from "./i18n/localization";
 import { en } from "@payloadcms/translations/languages/en";
 import { de } from "@payloadcms/translations/languages/de";
+// import { uploadthingStorage } from "@payloadcms/storage-uploadthing";
 
 import { resendAdapter } from "@payloadcms/email-resend";
 
@@ -57,9 +59,18 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 };
 
 export default buildConfig({
-  i18n: { supportedLanguages: { en, de } },
+  // localization: {
+  //   locales: ["en", "de"],
+  //   defaultLocale: "de",
+  // },
+
+  i18n: {
+    supportedLanguages: { en, de },
+  },
   admin: {
-    importMap: { baseDir: path.resolve(dirname) },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     user: Users.slug,
     livePreview: {
       breakpoints: [
@@ -80,22 +91,29 @@ export default buildConfig({
           "#00FF00",
           "#0000FF",
           "#7eb36a",
-        ],
+        ], // Customize this list
       }),
     ],
   }),
-  db: mongooseAdapter({ url: process.env.DATABASE_URI || "" }),
-  collections: [Pages, Posts, Doctors, Media, Categories, Users],
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI || "",
+  }),
+  collections: [Pages, Posts, Doctors, Media, Categories, Users], // <-- Added Doctors
   cors: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ""].filter(Boolean),
   csrf: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ""].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
     redirectsPlugin({
-      collections: ["pages", "posts", "doctors"],
+      collections: ["pages", "posts", "doctors"], // <-- Added Doctors
       overrides: {
         fields: ({ defaultFields }) =>
           defaultFields.map((field) => {
-            if ("name" in field && "type" in field && field.name === "from") {
+            if (
+              "name" in field &&
+              "type" in field &&
+              field.name === "from" &&
+              field.type === "text"
+            ) {
               return {
                 ...field,
                 admin: {
@@ -103,14 +121,18 @@ export default buildConfig({
                   description:
                     "You will need to rebuild the website when changing this field.",
                 },
-              } as Field; // ✅ cast to Field
+              };
             }
             return field;
-          }) as Field[], // ✅ cast the array to Field[]
-        hooks: { afterChange: [revalidateRedirects] },
+          }),
+        hooks: {
+          afterChange: [revalidateRedirects],
+        },
       },
     }),
-    nestedDocsPlugin({ collections: ["categories"] }),
+    nestedDocsPlugin({
+      collections: ["categories"],
+    }),
     seoPlugin({
       generateTitle,
       generateURL,
@@ -120,12 +142,24 @@ export default buildConfig({
           name: "keywords",
           label: "Meta Keywords",
           type: "text",
-          admin: { description: "Comma-separated keywords for SEO purposes" },
+          admin: {
+            description: "Comma-separated keywords for SEO purposes",
+          },
         },
       ],
     }),
+    // uploadthingStorage({
+    //   collections: {
+    //     media: true,
+    //   },
+    //   options: {
+    //     token: process.env.UPLOADTHING_TOKEN || "",
+    //   },
+    // }),
     formBuilderPlugin({
-      fields: { payment: false },
+      fields: {
+        payment: false,
+      },
       formOverrides: {
         fields: ({ defaultFields }) =>
           defaultFields.map((field) => {
@@ -148,7 +182,7 @@ export default buildConfig({
       },
     }),
     searchPlugin({
-      collections: ["posts", "doctors"],
+      collections: ["posts", "doctors"], // <-- Added Doctors
       beforeSync: beforeSyncWithSearch,
       searchOverrides: {
         fields: ({ defaultFields }) => [...defaultFields, ...searchFields],
@@ -165,5 +199,7 @@ export default buildConfig({
   }),
   secret: process.env.PAYLOAD_SECRET!,
   sharp,
-  typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
+  typescript: {
+    outputFile: path.resolve(dirname, "payload-types.ts"),
+  },
 });

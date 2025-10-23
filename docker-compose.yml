@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   payload:
     image: node:18-alpine
@@ -7,25 +9,27 @@ services:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
       - pnpm_store:/home/node/.pnpm-store
-    working_dir: /home/node/app/
+    working_dir: /home/node/app
     command: sh -c "npm install -g pnpm && pnpm install && pnpm dev"
-    depends_on:
-      - mongo
     env_file:
       - .env
+    depends_on:
+      - mongo
 
   mongo:
     image: mongo:latest
+    container_name: payload_mongo
+    restart: unless-stopped
     ports:
       - "27017:27017"
     command:
       - --storageEngine=wiredTiger
     volumes:
-      - data:/data/db
+      - mongodb_data:/data/db
     logging:
       driver: none
 
 volumes:
-  data:
+  mongodb_data:
   node_modules:
   pnpm_store:

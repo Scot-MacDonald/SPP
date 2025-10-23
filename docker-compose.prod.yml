@@ -11,25 +11,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
-    depends_on:
-      - mongo
     volumes:
-      - pnpm_store:/home/node/.pnpm-store
-      - node_modules:/home/node/app/node_modules
-      - ./public/media:/home/node/app/public/media # optional, persistent uploads
-
-  mongo:
-    image: mongo:latest
-    container_name: payload_mongo
-    restart: unless-stopped
-    volumes:
-      - mongodb_data:/data/db
-    command:
-      - --storageEngine=wiredTiger
-    logging:
-      driver: none
+      - ./public/media:/home/node/app/public/media # persistent uploads
 
 volumes:
-  mongodb_data:
-  pnpm_store:
-  node_modules:
+  # Only needed if you want to persist media uploads outside the container
