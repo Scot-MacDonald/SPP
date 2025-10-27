@@ -46,9 +46,10 @@ export const Media: CollectionConfig = {
   ],
 
   upload: {
-    staticDir: "/home/node/app/public/media", // persistent VPS folder
-    // @ts-ignore: Payload accepts staticURL even if TS complains
-    staticURL: "/media", // URL prefix for accessing images
+    staticDir:
+      process.env.PAYLOAD_UPLOAD_STATIC_DIR || "/home/node/app/public/media",
+    // @ts-ignore
+    staticURL: process.env.PAYLOAD_UPLOAD_STATIC_URL || "/media",
     mimeTypes: ["image/*", "image/svg+xml", "application/xml"],
   },
 };
