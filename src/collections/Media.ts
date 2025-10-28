@@ -46,10 +46,50 @@ export const Media: CollectionConfig = {
   ],
 
   upload: {
-    staticDir:
-      process.env.PAYLOAD_UPLOAD_STATIC_DIR || "/home/node/app/public/media",
-    // @ts-ignore
-    staticURL: process.env.PAYLOAD_UPLOAD_STATIC_URL || "/media",
+    staticDir: process.env.PAYLOAD_UPLOAD_STATIC_DIR, // Coolify persistent path
     mimeTypes: ["image/*", "image/svg+xml", "application/xml"],
+  },
+
+  hooks: {
+    beforeChange: [
+      async ({ data, originalDoc }) => {
+        const fs = require("fs");
+        const path = require("path");
+
+        // Delete old file if updating
+        if (originalDoc && originalDoc.filename) {
+          const oldPath = path.join(
+            process.env.PAYLOAD_UPLOAD_STATIC_DIR,
+            originalDoc.filename
+          );
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        // Rename new file to include timestamp to avoid browser caching
+        if (data && data.filename) {
+          const ext = data.filename.split(".").pop();
+          const name = data.filename.replace(/\.[^/.]+$/, "");
+          const timestamp = Date.now();
+          const newFilename = `${name}-${timestamp}.${ext}`;
+
+          const oldFilePath = path.join(
+            process.env.PAYLOAD_UPLOAD_STATIC_DIR,
+            data.filename
+          );
+          const newFilePath = path.join(
+            process.env.PAYLOAD_UPLOAD_STATIC_DIR,
+            newFilename
+          );
+
+          if (fs.existsSync(oldFilePath)) {
+            fs.renameSync(oldFilePath, newFilePath);
+          }
+
+          data.filename = newFilename;
+        }
+
+        return data;
+      },
+    ],
   },
 };
