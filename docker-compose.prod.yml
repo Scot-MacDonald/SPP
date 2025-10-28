@@ -16,7 +16,18 @@ services:
     volumes:
       - pnpm_store:/home/node/.pnpm-store
       - node_modules:/home/node/app/node_modules
-      - ./public/media:/home/node/app/public/media # optional, persistent uploads
+      - ./public/media:/home/node/app/public/media # persistent uploads
+
+    # 👇 Add this block:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.payload.rule=Host(`r048wo004kgsgk4404k8gc80.91.99.170.52.sslip.io`)"
+      - "traefik.http.routers.payload.entrypoints=web"
+      - "traefik.http.services.payload.loadbalancer.server.port=3000"
+      # Route /media through the same service
+      - "traefik.http.routers.payload-media.rule=Host(`r048wo004kgsgk4404k8gc80.91.99.170.52.sslip.io`) && PathPrefix(`/media`)"
+      - "traefik.http.routers.payload-media.entrypoints=web"
+      - "traefik.http.routers.payload-media.service=payload"
 
   mongo:
     image: mongo:latest
