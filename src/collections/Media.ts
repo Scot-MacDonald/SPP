@@ -52,4 +52,9 @@ export const Media: CollectionConfig = {
     staticURL: process.env.PAYLOAD_UPLOAD_STATIC_URL || "/media",
     mimeTypes: ["image/*", "image/svg+xml", "application/xml"],
   },
+  // upload: {
+  //   // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
+  //   staticDir: path.resolve(dirname, "../../public/media"),
+  //   mimeTypes: ["image/*", "image/svg+xml", "application/xml"],
+  // },
 };
